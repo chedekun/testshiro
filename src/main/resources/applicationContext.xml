@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <!-- shiro -->
+
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <property name="cacheManager" ref="cacheManager"/>
+        <property name="realm" ref="jdbcRealm"/>
+    </bean>
+
+    <bean id="cacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
+        <property name="cacheManagerConfigFile" value="classpath:ehcache.xml"/>
+    </bean>
+
+    <!-- 3. 配置Realm -->
+    <!-- 3.1 直接配置了实现com.apache.shiro.realm.Realm 接口的bean-->
+    <bean id="jdbcRealm" class="com.mkt.james.realms.ShiroRealm">
+
+    </bean>
+
+    <!-- =========================================================
+         Shiro Spring-specific integration
+         ========================================================= -->
+
+    <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>
+
+    <!-- Enable Shiro Annotations for Spring-configured beans.  Only run after
+         the lifecycleBeanProcessor has run: -->
+    <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"
+          depends-on="lifecycleBeanPostProcessor"/>
+    <bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+        <property name="securityManager" ref="securityManager"/>
+    </bean>
+
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <property name="securityManager" ref="securityManager"/>
+        <property name="loginUrl" value="/login.jsp"/>
+        <property name="successUrl" value="/list.jsp"/>
+        <property name="unauthorizedUrl" value="/unauthorized.jsp"/>
+
+        <property name="filterChainDefinitionMap" ref="filterChainDefinitionMap">
+
+        </property>
+        <!--<property name="filterChainDefinitions">-->
+            <!--<value>-->
+                <!--&lt;!&ndash;/favicon.ico = anon&ndash;&gt;-->
+                <!--&lt;!&ndash;/logo.png = anon&ndash;&gt;-->
+                <!--&lt;!&ndash;/shiro.css = anon&ndash;&gt;-->
+                <!--&lt;!&ndash;/s/login = anon&ndash;&gt;-->
+                <!--&lt;!&ndash;# allow WebStart to pull the jars for the swing app:&ndash;&gt;-->
+                <!--&lt;!&ndash;/*.jar = anon&ndash;&gt;-->
+                <!--&lt;!&ndash;# everything else requires authentication:&ndash;&gt;-->
+
+                <!--/login.jsp = anon-->
+                <!--/shiro/login = anon-->
+
+                <!--/admin.jsp = roles[admin]-->
+                <!--/user.jsp = roles[user]-->
+
+                <!--/shiro/logout = logout-->
+
+                <!--/** = authc-->
+            <!--</value>-->
+        <!--</property>-->
+    </bean>
+
+
+    <!--通过实例工厂类方式配置一个Map型的Bean-->
+    <bean id="filterChainDefinitionMap" factory-bean="filterChainDefinitionMapBuilder" factory-method="buildFilterChainDefinitionMap">
+
+    </bean>
+
+
+    <bean id="filterChainDefinitionMapBuilder" class="com.mkt.james.factory.FilterChainDefinitionMapBuilder">
+
+    </bean>
+
+    <bean id="shiroService" class="com.mkt.james.service.ShiroService">
+
+     </bean>
+
+</beans>
